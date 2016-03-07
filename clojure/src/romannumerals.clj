@@ -1,6 +1,22 @@
 (def numerals [["M" 1000] ["CM" 900] ["D" 500] ["CD" 400] ["C" 100] ["XC" 90]
                ["L" 50] ["XL" 40] ["X" 10] ["IX" 9] ["V" 5] ["IV" 4] ["I" 1]])
 
+(defn convert [n]
+  (cond
+    (<= n 0) (throw (Exception. "Numbers of 0 and below not supported"))
+    (>= n 5000) (throw (Exception. "Numbers of 5000 and over not supported"))
+    :else (first (reduce (fn [acc pair]
+                           (let [div (quot (second acc) (second pair))]
+                             (if (= div 0)
+                               acc
+                               [(str (first acc) (apply str (repeat div (first pair))))
+                                (- (second acc) (* div (second pair)))])))
+                         ["" n]
+                         numerals))))
+
+(try
+  (convert 5001)
+  (catch Exception e (assert (= "Numbers of 5000 and over not supported" (.getMessage e)))))
 (assert (= (convert 4999) "MMMMCMXCIX"))
 (assert (= (convert 4000) "MMMM"))
 (assert (= (convert 2444) "MMCDXLIV"))
@@ -24,4 +40,10 @@
 (assert (= (convert 4) "IV"))
 (assert (= (convert 3) "III"))
 (assert (= (convert 2) "II"))
-(assert (= (convert 2) "I"))
+(assert (= (convert 1) "I"))
+(try
+  (convert 0)
+  (catch Exception e (assert (= "Numbers of 0 and below not supported" (.getMessage e)))))
+(try
+  (convert -1)
+  (catch Exception e (assert (= "Numbers of 0 and below not supported" (.getMessage e)))))
