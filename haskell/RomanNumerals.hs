@@ -16,38 +16,14 @@ safeRomanNumerals n
         | n >= 5000     = Left "Numbers of 5000 and over not supported"
         | otherwise     = Right $ unsafeRomanNumerals n
 
-romanNumerals :: Int -> Either String String
-romanNumerals n
-        | n >= 5000         = Left "Numbers of 5000 and over not supported"
-        | n >= 1000         = (++) <$> Right "M" <*> romanNumerals (n - 1000)
-        | n >= 900          = (++) <$> Right "CM" <*> romanNumerals (n - 900)
-        | n >= 500          = (++) <$> Right "D" <*> romanNumerals (n - 500)
-        | n >= 400          = (++) <$> Right "CD" <*> romanNumerals (n - 400)
-        | n >= 100          = (++) <$> Right "C" <*> romanNumerals (n - 100)
-        | n >= 90           = (++) <$> Right "XC" <*> romanNumerals (n - 90)
-        | n >= 50           = (++) <$> Right "L" <*> romanNumerals (n - 50)
-        | n >= 40           = (++) <$> Right "XL" <*> romanNumerals (n - 40)
-        | n >= 10           = (++) <$> Right "X" <*> romanNumerals (n - 10)
-        | n == 9             = Right "IX"
-        | n >= 5            = (++) <$> Right "V" <*> (romanNumerals (n - 5))
-        | n == 4            = Right "IV"
-        | n >= 1 && n <= 3  = Right (replicate n 'I')
-        | n <= 0            = Left "Numbers of 0 or below not supported"
-
-romanNumerals' :: Int -> String
-romanNumerals' n
-        | n >= 5000         = "N"
-        | n >= 1000         = "M" ++ romanNumerals' (n - 1000)
-        | n >= 900          = "CM" ++ romanNumerals' (n - 900)
-        | n >= 500          = "D" ++ romanNumerals' (n - 500)
-        | n >= 400          = "CD" ++ romanNumerals' (n - 400)
-        | n >= 100          = "C" ++ romanNumerals' (n - 100)
-        | n >= 90           = "XC" ++ romanNumerals' (n - 90)
-        | n >= 50           = "L" ++ romanNumerals' (n - 50)
-        | n >= 40           = "XL" ++ romanNumerals' (n - 40)
-        | n >= 10           = "X" ++ romanNumerals' (n - 10)
-        | n == 9            = "IX"
-        | n >= 5            = "V" ++ romanNumerals' (n - 5)
-        | n == 4            = "IV"
-        | n >= 1 && n <= 3  = replicate n 'I'
-        | otherwise         = "N"
+unsafeRomanNumerals' :: Int -> String
+unsafeRomanNumerals' n = fst $ foldl
+                                (\ (accStr, accNum) (str, num)
+                                   -> let div = accNum `quot` num
+                                      in
+                                        if div == 0 then
+                                            (accStr, accNum)
+                                        else
+                                            ((accStr ++ (concat $ replicate div str)), (accNum - (div * num))))
+                                ("", n)
+                                numerals
